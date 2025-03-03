@@ -1,4 +1,4 @@
-# Racho AI Assistant
+# Aurelius AI Assistant
 
 A GPT-Powered Life Coach & Cofounder AI Assistant that helps users with personal development, goal tracking, task management, and productivity.
 
@@ -136,7 +136,7 @@ This project recently implemented a more robust multi-layer AI architecture that
 ## Usage
 
 1. Register an account or log in
-2. Use the chat interface to talk with Racho AI
+2. Use the chat interface to talk with Marcus AI
 3. Create goals and break them down into tasks
 4. Log your activities and mood
 5. Review insights generated from your data

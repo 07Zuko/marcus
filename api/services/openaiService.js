@@ -80,7 +80,7 @@ function generateFallbackResponse(userMessage) {
   if (userMessage.includes('hello') || userMessage.includes('hi') || userMessage.includes('hey') || 
       userMessage.includes('morning') || userMessage.includes('afternoon') || userMessage.includes('evening') ||
       userMessage.match(/^(hi|hello|hey)[\s\.,!]*$/)) {
-    return "Hello! I'm Racho, your AI life coach and cofounder assistant. How can I help you today? I can assist with goal setting, task management, productivity, or provide insights from your logs.";
+    return "Hello! I'm Marcus, your AI life coach and cofounder assistant. How can I help you today? I can assist with goal setting, task management, productivity, or provide insights from your logs.";
   }
   
   // Startup/business patterns
@@ -120,7 +120,7 @@ exports.generateInsights = async (logs, goals, userId) => {
   try {
     // Prepare prompt for insights generation
     const prompt = `
-As Racho, analyze the following user logs and goals to generate insights:
+As Marcus, analyze the following user logs and goals to generate insights:
 
 LOGS:
 ${JSON.stringify(logs, null, 2)}
@@ -151,7 +151,7 @@ Format your response as a JSON object with the following structure:
       messages: [
         { 
           role: 'system', 
-          content: `You are Racho, an AI Assistant in a goal-tracking app. 
+          content: `You are Marcus, an AI Assistant in a goal-tracking app. 
             Your task is to analyze user data and provide actionable insights.` 
         },
         { role: 'user', content: prompt }
@@ -179,7 +179,7 @@ Format your response as a JSON object with the following structure:
 exports.suggestTasks = async (goal) => {
   try {
     const prompt = `
-As Racho, suggest 3-5 specific, actionable tasks that would help achieve this goal:
+As Marcus, suggest 3-5 specific, actionable tasks that would help achieve this goal:
 
 GOAL:
 ${JSON.stringify(goal, null, 2)}
@@ -205,7 +205,7 @@ Format your response as a JSON array of task objects with the following structur
       messages: [
         { 
           role: 'system', 
-          content: `You are Racho, an AI Assistant in a goal-tracking app.
+          content: `You are Marcus, an AI Assistant in a goal-tracking app.
             Your task is to suggest specific, actionable tasks to help achieve goals.` 
         },
         { role: 'user', content: prompt }

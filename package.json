@@ -1,5 +1,5 @@
 {
-  "name": "racho-ai-assistant",
+  "name": "aurelius-ai-assistant",
   "version": "1.0.0",
   "description": "GPT-Powered Life Coach & Cofounder AI Assistant",
   "main": "server.js",

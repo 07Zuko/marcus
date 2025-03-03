@@ -19,7 +19,7 @@ module.exports = {
   JWT_SECRET: "replace-with-secure-random-string",
   
   // Database connection string (MongoDB)
-  MONGODB_URI: "mongodb://localhost:27017/racho_ai",
+  MONGODB_URI: "mongodb://localhost:27017/aurelius_ai",
   
   // Optional integrations
   GOOGLE_API_KEY: "your-google-api-key",

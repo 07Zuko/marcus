@@ -21,7 +21,7 @@ class ConversationManager {
     
     // Default system prompt
     this.defaultSystemPrompt = `
-      You are Racho, an AI Assistant in a goal-tracking app. Keep responses brief and conversational.
+      You are Marcus, an AI Assistant in a goal-tracking app. Keep responses brief and conversational.
       
       As a coach and cofounder, you help users achieve their goals, track tasks, and improve productivity.
       Be friendly, supportive, and to-the-point.
@@ -45,7 +45,7 @@ class ConversationManager {
     
     // For debugging, write messages to log file
     const fs = require('fs');
-    const logPath = '/Users/charlier/Documents/marcus/racho_website/logs/conversation.log';
+    const logPath = '/Users/charlier/Documents/marcus/aurelius_website/logs/conversation.log';
     
     try {
       fs.appendFileSync(logPath, 

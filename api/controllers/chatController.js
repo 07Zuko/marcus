@@ -469,7 +469,7 @@ exports.directChat = async (req, res) => {
     
     // Log complete conversation for debugging
     const fs = require('fs');
-    const logPath = '/Users/charlier/Documents/marcus/racho_website/logs/direct-chat.log';
+    const logPath = '/Users/charlier/Documents/marcus/aurelius_website/logs/direct-chat.log';
     try {
       fs.appendFileSync(logPath, 
         `\n\n---------- NEW REQUEST (${new Date().toISOString()}) ----------\n` +
@@ -605,7 +605,7 @@ exports.directChat = async (req, res) => {
         console.log('Handling as goal-related conversation');
         
         // For goal creation, use a specific prompt
-        const systemPrompt = `You are Racho, an AI Assistant helping with fitness goals.
+        const systemPrompt = `You are Marcus, an AI Assistant helping with fitness goals.
         
         The user is having a conversation about fitness goals. Respond in a friendly, concise way.
         
@@ -628,7 +628,7 @@ exports.directChat = async (req, res) => {
       else if (isTaskConversation) {
         console.log('Handling as task-related conversation');
         
-        const systemPrompt = `You are Racho, an AI Assistant helping with task management.
+        const systemPrompt = `You are Marcus, an AI Assistant helping with task management.
         
         Keep responses brief and conversational. If the user wants to create a task:
         1. Extract the task details

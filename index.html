@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Racho AI Assistant</title>
+    <title>Aurelius AI Assistant</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,7 +65,7 @@
                     <path d="M16 2C8.26801 2 2 8.26801 2 16C2 23.732 8.26801 30 16 30C23.732 30 30 23.732 30 16C30 8.26801 23.732 2 16 2Z" stroke="#5046E5" stroke-width="2"/>
                     <path d="M16 8V16L21 21" stroke="#5046E5" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-                <h1>Racho<span>AI</span></h1>
+                <h1>Aurelius<span>AI</span></h1>
             </div>
             <nav class="sidebar-nav">
                 <ul>
@@ -153,7 +153,7 @@
         <main class="main-content">
             <div class="chat-container">
                 <div class="chat-header">
-                    <h2>Chat with Racho</h2>
+                    <h2>Chat with Marcus</h2>
                     <button class="new-chat-btn" id="new-chat-btn">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M10 4.16667V15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -183,7 +183,7 @@
         const newChatBtn = document.getElementById('new-chat-btn');
         
         // Define a unique key for storing messages in localStorage
-        const STORAGE_KEY = 'racho_chat_messages';
+        const STORAGE_KEY = 'aurelius_chat_messages';
         
         // Messages array to keep track of conversation
         let chatMessages = [];
@@ -217,13 +217,13 @@
                     setTimeout(scrollToBottom, 100);
                 } else {
                     // Initialize with welcome message if no history exists
-                    const welcomeMessage = 'Hello! I am Racho, your AI life coach and cofounder assistant. I can help you with goal-setting, productivity, personal development, and startup advice. How can I assist you today?';
+                    const welcomeMessage = 'Hello! I am Marcus, your AI life coach and cofounder assistant. I can help you with goal-setting, productivity, personal development, and startup advice. How can I assist you today?';
                     addMessage(welcomeMessage, 'system');
                 }
             } catch (error) {
                 console.error('Error loading chat history:', error);
                 // Fallback to welcome message
-                const welcomeMessage = 'Hello! I am Racho, your AI life coach and cofounder assistant. I can help you with goal-setting, productivity, personal development, and startup advice. How can I assist you today?';
+                const welcomeMessage = 'Hello! I am Marcus, your AI life coach and cofounder assistant. I can help you with goal-setting, productivity, personal development, and startup advice. How can I assist you today?';
                 addMessage(welcomeMessage, 'system');
             }
         }
@@ -380,7 +380,7 @@
             chatMessages = [];
             
             // Add initial system message
-            addMessage('Hello! I am Racho, your AI life coach and cofounder assistant. How can I assist you today?', 'system');
+            addMessage('Hello! I am Marcus, your AI life coach and cofounder assistant. How can I assist you today?', 'system');
             
             // Save empty chat to localStorage
             saveChatHistory();

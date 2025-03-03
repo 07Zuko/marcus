@@ -1,6 +1,6 @@
 /**
  * AI Service Interface
- * Base interface for all AI services in the Racho application
+ * Base interface for all AI services in the Aurelius application
  */
 class AIService {
   /**
