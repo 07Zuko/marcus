@@ -440,6 +440,206 @@ exports.deleteChatSession = async (req, res) => {
   }
 };
 
+// Helper function to check if message is about creating a goal
+async function checkForGoalCreation(message, history) {
+  // Get OpenAI to determine if this is a goal creation intent
+  if (typeof message !== 'string') return false;
+  
+  // Create full context for analysis
+  const fullHistory = [...history, { role: 'user', content: message }];
+  
+  try {
+    // Use OpenAI to analyze the intent
+    const openaiService = require('../services/openaiService');
+    
+    const analysisMessages = [
+      {
+        role: 'system',
+        content: `You are helping determine if the user wants to create a goal. 
+        Analyze ONLY the user's request and determine if they are:
+        1. Explicitly asking to create/add/save a goal
+        2. Confirming a goal creation after we suggested one
+        3. Providing specific goal details that should be saved
+        
+        Respond with ONLY a JSON object: {"isGoalCreation": true/false, "confidence": 0.0-1.0}
+        Do not include any explanation or other text.`
+      },
+      ...fullHistory.slice(-3), // Just the most recent messages for context
+      {
+        role: 'user',
+        content: 'Is the user trying to create a goal? Return only JSON.'
+      }
+    ];
+    
+    const analysis = await openaiService.processChat(analysisMessages, 'system');
+    
+    // Extract the response
+    let result;
+    try {
+      // Try to find JSON in the response
+      const content = analysis.message.content;
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        result = JSON.parse(jsonMatch[0]);
+        console.log('Goal creation intent analysis:', result);
+        
+        if (result.isGoalCreation && result.confidence > 0.7) {
+          return true;
+        }
+      }
+    } catch (parseError) {
+      console.error('Error parsing AI intent analysis JSON:', parseError);
+    }
+    
+    // Fallback to simple checks if AI analysis failed
+    const content = message.toLowerCase();
+    
+    // Direct goal creation statements
+    if ((content.includes('add') || content.includes('create') || content.includes('set')) && 
+        content.includes('goal')) {
+      return true;
+    }
+    
+    // Specific fitness goals with metrics
+    if ((content.includes('bench press') || content.includes('deadlift') || content.includes('squat')) && 
+        /\d+\s*(lbs|pounds|kg)/.test(content)) {
+      return true;
+    }
+    
+    // Check for simple confirmation to a goal prompt
+    if (history.length > 0) {
+      const lastAssistantMsg = [...history].reverse().find(m => m.role === 'assistant');
+      if (lastAssistantMsg) {
+        const assistantContent = lastAssistantMsg.content.toLowerCase();
+        
+        // Check if this is a simple confirmation
+        if (['yes', 'yeah', 'yep', 'okay', 'ok', 'sure', 'correct', 'sounds good'].includes(content.trim())) {
+          // Check if the last message was about a goal
+          if (assistantContent.includes('goal') || 
+              assistantContent.includes('look right') ||
+              (assistantContent.includes('bench press') && assistantContent.includes('reps'))) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error in goal intent detection:', error);
+    
+    // Fallback to basic detection
+    const content = message.toLowerCase();
+    return content.includes('add goal') || 
+           content.includes('create goal') || 
+           content.includes('save goal') ||
+           content.includes('set goal');
+  }
+}
+
+// Helper function to extract goal details from conversation
+async function extractGoalDetails(message, history) {
+  try {
+    // Use OpenAI to extract goal details
+    const openaiService = require('../services/openaiService');
+    
+    // Create full context for analysis
+    const fullHistory = [...history, { role: 'user', content: message }];
+    
+    const extractionMessages = [
+      {
+        role: 'system',
+        content: `You are an AI that extracts goal information from conversations.
+        
+        Extract the following from the conversation:
+        - title: The specific goal (e.g., "Bench press 225 lbs for 8 reps") 
+        - category: Use "health" for fitness goals (valid categories: career, health, personal, financial, other)
+        - deadline: When they want to achieve it (e.g., "end of year")
+        - description: Brief description of the goal
+        
+        Return ONLY a JSON object like:
+        {
+          "title": "...",
+          "category": "health",  // Must be one of: career, health, personal, financial, other
+          "deadline": "...",
+          "description": "..."
+        }
+        
+        Be as specific as possible and include all measurable details (weights, reps, etc.).`
+      },
+      ...fullHistory.slice(-5), // Use last 5 messages for context
+      {
+        role: 'user',
+        content: 'Extract the goal information from our conversation as JSON only.'
+      }
+    ];
+    
+    const extraction = await openaiService.processChat(extractionMessages, 'system');
+    
+    // Try to parse JSON from the response
+    try {
+      const content = extraction.message.content;
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        const goalData = JSON.parse(jsonMatch[0]);
+        console.log('Extracted goal data using AI:', goalData);
+        
+        // Ensure we have a valid category
+        if (goalData.category === 'fitness') {
+          goalData.category = 'health';
+        }
+        
+        return goalData;
+      }
+    } catch (parseError) {
+      console.error('Error parsing goal extraction JSON:', parseError);
+    }
+  } catch (error) {
+    console.error('Error in AI goal extraction:', error);
+  }
+  
+  // Fallback to manual extraction if AI fails
+  const allMessages = [...history, { role: 'user', content: message }];
+  const allContent = allMessages.map(m => m.content.toLowerCase()).join(' ');
+  
+  // Default goal data
+  const goalData = {
+    title: 'Fitness goal',
+    category: 'health',  // Use valid category
+    deadline: 'end of year',
+    description: ''
+  };
+  
+  // Look for bench press goals with specific weights
+  if (allContent.includes('bench press') || allContent.includes('bench')) {
+    // Extract weight
+    const weightMatch = allContent.match(/(\d+)\s*(lbs|pounds|kg|lb)/i);
+    if (weightMatch) {
+      const weight = weightMatch[1];
+      const unit = weightMatch[2];
+      
+      // Look for rep count
+      const repMatch = allContent.match(/(\d+)\s*reps/i);
+      const reps = repMatch ? repMatch[1] : '';
+      
+      goalData.title = `Bench press ${weight} ${unit}${reps ? ` for ${reps} reps` : ''}`;
+      goalData.description = `Strength training goal to improve bench press to ${weight} ${unit}`;
+    } else {
+      goalData.title = 'Improve bench press strength';
+    }
+  }
+  
+  // Look for deadlines
+  const deadlineMatch = allContent.match(/by\s+(end\s+of\s+\d{4}|end\s+of\s+year|end\s+of\s+the\s+year|next\s+\w+|\w+\s+\d{4})/i);
+  if (deadlineMatch) {
+    goalData.deadline = deadlineMatch[1];
+  }
+  
+  return goalData;
+}
+
 /**
  * Handle direct chat requests (without authentication)
  */
@@ -455,7 +655,7 @@ exports.directChat = async (req, res) => {
       });
     }
     
-    console.log('Direct chat message received:', JSON.stringify(message).substring(0, 100));
+    console.log('Direct chat message received:', message.substring(0, 100) + '...');
     console.log('===============================================');
     
     // Get conversation history from request if available
@@ -480,191 +680,39 @@ exports.directChat = async (req, res) => {
       console.error('Error writing to log file:', fsError);
     }
     
-    // Check if this is a goal-related conversation
-    let isGoalConversation = false;
-    let isTaskConversation = false;
-    
-    // Helper function to check goal-related content
-    const isGoalRelated = (content) => {
-      content = content.toLowerCase();
-      return content.includes('goal') || 
-             content.includes('bench press') ||
-             content.includes('stronger') ||
-             content.includes('gym') || 
-             content.includes('fitness') ||
-             content.includes('workout');
-    };
-    
-    // Check if a simple "yes" response to a goal-related question
-    const isSimpleConfirmation = (content, prevContent) => {
-      content = content.toLowerCase().trim();
-      const confirmations = ['yes', 'yeah', 'yep', 'sure', 'ok', 'okay'];
-      
-      // Check if this is a simple confirmation
-      const isConfirmation = confirmations.includes(content) || 
-                            confirmations.map(w => w + '.').includes(content) ||
-                            content.includes('definitely');
-                            
-      // And if the previous message was goal-related
-      const isPrevGoalRelated = prevContent && 
-        (prevContent.toLowerCase().includes('goal') ||
-         prevContent.toLowerCase().includes('set that') ||
-         prevContent.toLowerCase().includes('stronger'));
-         
-      return isConfirmation && isPrevGoalRelated;
-    };
-    
-    // Check current message
-    if (isGoalRelated(message)) {
-      isGoalConversation = true;
-    }
-    
-    // Check if we have a simple confirmation to a goal-related question
-    if (updatedHistory.length >= 2) {
-      const lastMsg = updatedHistory[updatedHistory.length - 1];
-      const prevMsg = updatedHistory[updatedHistory.length - 2];
-      
-      if (prevMsg.role === 'assistant' && lastMsg.role === 'user') {
-        if (isSimpleConfirmation(lastMsg.content, prevMsg.content)) {
-          isGoalConversation = true;
-          console.log('Detected goal confirmation:', lastMsg.content, 'to previous message:', prevMsg.content);
-          
-          // Check if we've reached a state where we need to create the goal
-          if (prevMsg.content.toLowerCase().includes('would you like') ||
-              prevMsg.content.toLowerCase().includes('like me to help') ||
-              prevMsg.content.toLowerCase().includes('want to set')) {
-              
-            // This is a confirmation to create a goal, so use the direct approach
-            console.log('CREATING GOAL DIRECTLY FROM CONVERSATION');
-            
-            // Find the most specific goal description from conversation
-            let goalTitle = 'Get stronger in the gym';
-            let goalDeadline = 'end of year';
-            
-            // Look through user messages for specific goal details
-            for (const msg of updatedHistory) {
-              if (msg.role === 'user') {
-                const content = msg.content.toLowerCase();
-                
-                // Look for bench press specific goal
-                if (content.includes('bench press')) {
-                  const weightMatch = content.match(/(\d+)\s*(lbs|pounds|kg|lb)/);
-                  if (weightMatch) {
-                    goalTitle = `Bench press ${weightMatch[1]} ${weightMatch[2]}`;
-                  } else {
-                    goalTitle = 'Improve bench press strength';
-                  }
-                } 
-                // Look for deadline
-                const timeMatch = content.match(/by\s+(end\s+of\s+[a-z]+|[a-z]+)/i);
-                if (timeMatch) {
-                  goalDeadline = timeMatch[1];
-                }
-              }
-            }
-            
-            // Return a success response with the created goal
-            return res.json({
-              success: true,
-              result: {
-                aiMessage: `Done! I've added "${goalTitle}" to your goals. You can track your progress in the Goals tab.`,
-                model: 'goal-creation',
-                goalCreated: true,
-                goalData: {
-                  title: goalTitle,
-                  category: 'fitness',
-                  deadline: goalDeadline
-                }
-              }
-            });
-          }
-        }
-      }
-    }
-    
-    // Check for task-related conversation
-    const isTaskRelated = (content) => {
-      content = content.toLowerCase();
-      return content.includes('task') || 
-             content.includes('to-do') || 
-             content.includes('todo') ||
-             content.includes('to do');
-    };
-    
-    if (isTaskRelated(message)) {
-      isTaskConversation = true;
-    }
-    
-    // Process with OpenAI
-    let response;
+    // Process with the enhanced AI architecture
     try {
-      // Prepare messages for OpenAI
-      let messages = [];
+      // Process directly with the AI service
+      const response = await openaiService.processChat(updatedHistory, directUserId);
+      console.log('Enhanced AI response received:', 
+        response.message.content.substring(0, 100) + '...');
       
-      if (isGoalConversation) {
-        console.log('Handling as goal-related conversation');
-        
-        // For goal creation, use a specific prompt
-        const systemPrompt = `You are Marcus, an AI Assistant helping with fitness goals.
-        
-        The user is having a conversation about fitness goals. Respond in a friendly, concise way.
-        
-        If the user mentions setting a specific goal:
-        1. Extract the goal details
-        2. Offer to add it to their goals
-        3. Keep it brief and conversational - avoid being too formal
-        
-        If the user is confirming they want to set a goal:
-        - Ask for specific details about the goal
-        - For example: "Great! What specific strength goal would you like to track? For example, bench press a certain weight or increase reps?"
-        
-        Be supportive but not overly enthusiastic. Keep responses under 2 sentences when possible.`;
-        
-        messages = [
-          { role: 'system', content: systemPrompt },
-          ...updatedHistory
-        ];
-      } 
-      else if (isTaskConversation) {
-        console.log('Handling as task-related conversation');
-        
-        const systemPrompt = `You are Marcus, an AI Assistant helping with task management.
-        
-        Keep responses brief and conversational. If the user wants to create a task:
-        1. Extract the task details
-        2. Offer to add it to their tasks
-        3. Keep it brief and friendly
-        
-        If they confirm, acknowledge that you've added the task.`;
-        
-        messages = [
-          { role: 'system', content: systemPrompt },
-          ...updatedHistory
-        ];
-      }
-      else {
-        console.log('Handling as general conversation');
-        
-        // For general conversation, pass the complete history
-        messages = updatedHistory;
-      }
+      // Check if a goal was created (from response metadata)
+      const goalCreated = response.goalCreated || false;
+      const goalInfo = response.goalInfo || null;
       
-      // Process with OpenAI service
-      response = await openaiService.processChat(messages, directUserId);
-      console.log('Chat response received:', response.message.content.substring(0, 70) + '...');
+      console.log('Response from AI service:', {
+        model: response.model,
+        agent: response.agent,
+        goalCreated: goalCreated,
+        goalInfo: goalInfo ? 'present' : 'null'
+      });
       
-      // Return response to client
+      // Format the response for the client
+      const result = {
+        aiMessage: response.message.content,
+        model: response.model || 'gpt-3.5-turbo',
+        agent: response.agent || 'general',
+        goalCreated: goalCreated,
+        goalInfo: goalInfo
+      };
+      
       return res.json({
         success: true,
-        result: {
-          aiMessage: response.message.content,
-          model: response.model,
-          goalDetected: isGoalConversation,
-          taskDetected: isTaskConversation
-        }
+        result
       });
     } catch (error) {
-      console.error('Error processing direct chat:', error);
+      console.error('Error processing with enhanced AI:', error);
       
       // Return a friendly error message
       return res.status(500).json({
@@ -682,6 +730,61 @@ exports.directChat = async (req, res) => {
     });
   }
 };
+
+// Helper function to create goals directly from chat
+// This allows GPT to seamlessly create goals without complex routing
+async function createGoalFromChat(userId, goalData) {
+  try {
+    console.log('Creating goal from chat:', goalData);
+    
+    // Get a valid user ID for direct chat users
+    if (userId === 'direct_chat_user') {
+      const User = require('../models/User');
+      const directChatUserId = await User.createDirectChatUser();
+      if (directChatUserId) {
+        userId = directChatUserId;
+      } else {
+        return { success: false, message: 'Failed to create user for goal' };
+      }
+    }
+    
+    // Create the goal with the extracted data
+    const Goal = require('../models/Goal');
+    
+    // Map fitness goals to valid 'health' category
+    let category = 'other';
+    if (goalData.category) {
+      if (goalData.category.toLowerCase() === 'fitness') {
+        category = 'health';
+      } else if (['career', 'health', 'personal', 'financial'].includes(goalData.category.toLowerCase())) {
+        category = goalData.category.toLowerCase();
+      }
+    }
+    
+    const goal = new Goal({
+      user: userId,
+      title: goalData.title || 'Fitness goal',
+      description: goalData.description || '',
+      category: category,
+      priority: goalData.priority || 'medium',
+      status: 'in progress',
+      deadline: goalData.deadline ? 
+        (goalData.deadline.toLowerCase() === 'end of year' ? 
+          new Date(new Date().getFullYear(), 11, 31) : // Dec 31 of current year
+          new Date(goalData.deadline)) : 
+        new Date(new Date().getFullYear(), 11, 31) // Default to end of year
+    });
+    
+    // Save the goal
+    await goal.save();
+    console.log('Successfully created goal:', goal._id);
+    
+    return { success: true, goal };
+  } catch (error) {
+    console.error('Error creating goal from chat:', error);
+    return { success: false, error: error.message };
+  }
+}
 
 /**
  * Create a goal or task based on chat instruction

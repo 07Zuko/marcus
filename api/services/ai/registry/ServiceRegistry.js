@@ -1,25 +1,35 @@
 /**
  * Service Registry
- * Manages all specialized AI services and helps route requests
+ * Manages AI services and specialists
  */
 class ServiceRegistry {
   constructor() {
     this.services = [];
+    this.specialists = [];
   }
 
   /**
-   * Register a new service
+   * Register a service
    * @param {BaseService} service - Service to register
    */
   registerService(service) {
     this.services.push(service);
     console.log(`Registered service: ${service.getName()}`);
   }
+  
+  /**
+   * Register a specialist
+   * @param {DomainSpecialistBase} specialist - Specialist to register
+   */
+  registerSpecialist(specialist) {
+    this.specialists.push(specialist);
+    console.log(`Registered specialist: ${specialist.getName()}`);
+  }
 
   /**
-   * Find a service that can handle this request
+   * Find a service that can handle a conversation
    * @param {Array} messages - Message history
-   * @returns {Promise<BaseService|null>} - Service that can handle the request, or null
+   * @returns {Promise<BaseService|null>} - Service or null
    */
   async findService(messages) {
     for (const service of this.services) {
@@ -36,13 +46,30 @@ class ServiceRegistry {
     console.log('No specialized service found for this request');
     return null;
   }
+  
+  /**
+   * Find specialists for a specific intent
+   * @param {string} intent - Intent to match
+   * @returns {Array} - List of matching specialists
+   */
+  findSpecialistsForIntent(intent) {
+    return this.specialists.filter(specialist => specialist.handlesIntent(intent));
+  }
 
   /**
    * Get all registered services
-   * @returns {Array} - List of all registered services
+   * @returns {Array} - List of services
    */
   getServices() {
     return this.services;
+  }
+  
+  /**
+   * Get all registered specialists
+   * @returns {Array} - List of specialists
+   */
+  getSpecialists() {
+    return this.specialists;
   }
 }
 

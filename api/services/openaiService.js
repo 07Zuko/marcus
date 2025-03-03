@@ -14,7 +14,7 @@ const openai = new OpenAI({
 });
 
 /**
- * Process chat message with our layered AI architecture
+ * Process chat message with our enhanced multi-tier AI architecture
  * @param {Array} messages - Chat history
  * @param {string} userId - User ID
  * @returns {Object} - AI response
@@ -32,8 +32,11 @@ exports.processChat = async (messages, userId) => {
         throw new Error('Placeholder API key detected. Please update config.js with your key.');
       }
       
-      // Process with our conversation manager
+      // Send to our enhanced multi-tier AI architecture
+      // The ConversationRouter will analyze intent and route to appropriate agents
+      console.log('Using enhanced multi-tier AI architecture with fluid conversation routing');
       return await aiService.processConversation(messages, userId);
+      
     } catch (apiError) {
       console.error('AI processing failed:', apiError.message);
       console.log('Falling back to local response generation...');

@@ -2,6 +2,7 @@ const BaseService = require('./BaseService');
 const OpenAI = require('openai');
 const config = require('../../../config');
 const Goal = require('../../../models/Goal');
+const User = require('../../../models/User');
 
 /**
  * Goal Service
@@ -193,9 +194,9 @@ class GoalService extends BaseService {
             );
             
             if (isSimpleConfirmation) {
-              console.log('User confirmed with simple yes - extracting goal from conversation history');
-              // Skip straight to goal extraction with all message history
-              return await this.handleGoalExtraction(messages, userId);
+              console.log('User confirmed with simple yes - going straight to goal confirmation');
+              // Skip straight to goal confirmation with all message history
+              return await this.handleGoalConfirmation(messages, userId);
             }
           }
         }
@@ -549,7 +550,7 @@ Does this look right?`
     if (content.includes('does this look right') || 
         content.includes('should i add this goal') ||
         content.includes('adding this goal') ||
-        content.includes('i'll add this goal')) {
+        content.includes('i\'ll add this goal')) {
       
       // Check if the user's last message is a confirmation
       if (lastMessage.role === 'user') {
@@ -567,6 +568,26 @@ Does this look right?`
         } else {
           console.log('User provided feedback on goal details - GOAL_DETAILS_COLLECTED');
           return this.states.GOAL_DETAILS_COLLECTED;
+        }
+      }
+    }
+    
+    // Special case: "yes" to a message containing goal details
+    if (lastMessage.role === 'user' && 
+        lastMessage.content.toLowerCase().match(/^(yes|yeah|yep|sure|ok|okay|sounds good)(\.|!|\s|$)/)) {
+      console.log('Found simple yes/confirmation to previous message');
+      
+      // Look at previous message from assistant
+      for (let i = messages.length - 2; i >= 0; i--) {
+        if (messages[i].role === 'assistant') {
+          const assistantMsg = messages[i].content.toLowerCase();
+          // If previous message had goal info and asked for confirmation
+          if ((assistantMsg.includes('goal:') || assistantMsg.includes('adding this goal:')) && 
+              (assistantMsg.includes('does this look right') || assistantMsg.includes('look good'))) {
+            console.log('Previous message was a goal confirmation prompt - GOAL_CONFIRMED');
+            return this.states.GOAL_CONFIRMED;
+          }
+          break;
         }
       }
     }
@@ -774,9 +795,38 @@ Does this look right?`
       
       // Try to create the goal in the database
       try {
-        // Check if we have a valid user ID
-        if (!userId || userId === 'direct_chat_user') {
-          // For unauthenticated users, we can't actually save the goal
+        // Handle direct chat user
+        if (userId === 'direct_chat_user') {
+          // Get or create a persistent user for direct chat
+          try {
+            const directChatUserId = await User.createDirectChatUser();
+            if (directChatUserId) {
+              console.log('Using persistent direct chat user ID for goal:', directChatUserId);
+              userId = directChatUserId; // Use actual MongoDB ID
+            } else {
+              // Fallback if we couldn't create a direct chat user
+              return {
+                message: {
+                  role: 'assistant',
+                  content: "Done! I've saved your goal. You can view and track it in the Goals tab."
+                },
+                model: 'no-auth-fallback',
+                usage: { total_tokens: 0 }
+              };
+            }
+          } catch (directChatError) {
+            console.error('Error creating direct chat user for goal:', directChatError);
+            return {
+              message: {
+                role: 'assistant',
+                content: "Done! I've saved your goal. You can view and track it in the Goals tab."
+              },
+              model: 'no-auth-fallback',
+              usage: { total_tokens: 0 }
+            };
+          }
+        } else if (!userId) {
+          // For completely missing user ID
           return {
             message: {
               role: 'assistant',

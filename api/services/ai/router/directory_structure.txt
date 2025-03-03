@@ -1,0 +1,4 @@
+Ensuring directory structure exists:
+- /api/services/ai/router/
+- /api/services/ai/agents/
+- /api/services/ai/implementers/

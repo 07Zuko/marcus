@@ -9,16 +9,16 @@ const authenticate = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Access denied. No token provided.' 
-      });
+      // No token provided - allow continue but with no user
+      // This allows public/guest access to some endpoints
+      console.log('No auth token provided - continuing as unauthenticated user');
+      req.user = null;
+      return next();
     }
     
     // Extract token from header
     const token = authHeader.split(' ')[1];
     
-    // All tokens will be treated as real JWT tokens - no demo mode
     console.log('Processing token for authentication');
     
     // For real tokens, verify with JWT
@@ -30,10 +30,9 @@ const authenticate = async (req, res, next) => {
       const user = await User.findById(decoded.id).select('-password');
       
       if (!user) {
-        return res.status(404).json({ 
-          success: false, 
-          message: 'User not found.' 
-        });
+        // User not found but continue as unauthenticated
+        req.user = null;
+        return next();
       }
       
       // Add user to request object
@@ -42,23 +41,9 @@ const authenticate = async (req, res, next) => {
     } catch (jwtError) {
       console.error('JWT verification error:', jwtError);
       
-      if (jwtError.name === 'JsonWebTokenError') {
-        return res.status(401).json({
-          success: false, 
-          message: 'Invalid token.' 
-        });
-      } else if (jwtError.name === 'TokenExpiredError') {
-        return res.status(401).json({
-          success: false, 
-          message: 'Token expired.' 
-        });
-      }
-      
-      // Do not fall back to demo mode - return authentication error
-      return res.status(401).json({
-        success: false, 
-        message: 'Authentication failed - invalid token.' 
-      });
+      // For any JWT error, continue as unauthenticated
+      req.user = null;
+      next();
     }
   } catch (error) {
     console.error('Authentication middleware error:', error);

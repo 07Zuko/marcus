@@ -23,6 +23,17 @@ const tasksRoutes = require('./api/routes/tasks');
 const insightsRoutes = require('./api/routes/insights');
 const logsRoutes = require('./api/routes/logs');
 
+// Global error handlers
+process.on('uncaughtException', (error) => {
+  console.error('UNCAUGHT EXCEPTION:', error);
+  // Keep the process running
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION:', reason);
+  // Keep the process running
+});
+
 // Initialize Express app
 const app = express();
 

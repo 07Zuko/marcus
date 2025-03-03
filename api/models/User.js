@@ -74,4 +74,33 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 
 const User = mongoose.model('User', userSchema);
 
+// Create a direct chat user for unauthenticated users
+User.createDirectChatUser = async function() {
+  try {
+    // Check if direct chat user already exists
+    let directUser = await User.findOne({ email: 'direct_chat_user@example.com' });
+    
+    if (!directUser) {
+      // Create a direct chat user
+      directUser = new User({
+        name: 'Guest User',
+        email: 'direct_chat_user@example.com',
+        password: 'direct_chat_password', // Will be hashed by pre-save hook
+        preferences: {
+          theme: 'light',
+          notifications: false
+        }
+      });
+      
+      await directUser.save();
+      console.log('Created direct chat user with ID:', directUser._id);
+    }
+    
+    return directUser._id;
+  } catch (error) {
+    console.error('Error creating direct chat user:', error);
+    return null;
+  }
+};
+
 module.exports = User;

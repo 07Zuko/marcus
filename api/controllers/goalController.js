@@ -8,7 +8,34 @@ const pineconeService = require('../services/pineconeService');
  */
 exports.getGoals = async (req, res) => {
   try {
-    const userId = req.user._id;
+    // Special handling for direct chat users without authentication
+    let userId;
+    
+    if (!req.user) {
+      // For unauthenticated users, try to use direct chat user
+      try {
+        const User = require('../models/User');
+        userId = await User.createDirectChatUser();
+        console.log('Using direct chat user for goals screen:', userId);
+      } catch (error) {
+        console.error('Error creating direct chat user in getGoals:', error);
+        // Return empty goals without error for unauthenticated users
+        return res.status(200).json({
+          success: true,
+          goals: []
+        });
+      }
+    } else {
+      userId = req.user._id;
+    }
+    
+    // If still no valid userId, return empty goals
+    if (!userId) {
+      return res.status(200).json({
+        success: true,
+        goals: []
+      });
+    }
     
     // Extract query parameters
     const { status, category, sort = 'createdAt' } = req.query;
