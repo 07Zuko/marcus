@@ -2,6 +2,13 @@
 
 A GPT-Powered Life Coach & Cofounder AI Assistant that helps users with personal development, goal tracking, task management, and productivity.
 
+## New: Multi-Layer AI Architecture
+This project recently implemented a more robust multi-layer AI architecture that improves:
+- Goal creation through natural conversation
+- Context preservation across interactions
+- Smart detection of user intents
+- More natural conversational flows
+
 ## Features
 
 - **Chat Interface**: Conversational AI assistant powered by GPT-4
@@ -33,8 +40,8 @@ A GPT-Powered Life Coach & Cofounder AI Assistant that helps users with personal
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/racho-ai-assistant.git
-   cd racho-ai-assistant
+   git clone https://github.com/charlieradford/testing.git
+   cd testing
    ```
 
 2. Install dependencies:
@@ -43,10 +50,11 @@ A GPT-Powered Life Coach & Cofounder AI Assistant that helps users with personal
    ```
 
 3. Configure API keys:
+   - Copy the example config file: `cp api/config.js.example api/config.js`
    - Update `api/config.js` with your OpenAI API key and other credentials
-   - The OpenAI API key must be a valid key that starts with "sk-" (not "sk-proj-")
+   - The OpenAI API key must be a valid key that starts with "sk-"
    - Without a valid OpenAI API key, the app will use fallback responses
-   - Make sure to add this file to `.gitignore`
+   - The config.js file is already in `.gitignore` to protect your API keys
 
 4. Set up MongoDB:
    - Create a MongoDB database

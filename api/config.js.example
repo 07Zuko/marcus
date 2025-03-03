@@ -1,0 +1,31 @@
+/**
+ * Configuration file for API keys and environment variables
+ * INSTRUCTIONS:
+ * 1. Copy this file to config.js
+ * 2. Replace the placeholder values with your actual API keys
+ * 3. Make sure config.js is in .gitignore
+ */
+
+module.exports = {
+  // OpenAI API key - Get yours at https://platform.openai.com/
+  OPENAI_API_KEY: "sk-placeholder-replace-with-valid-openai-key",
+  
+  // Pinecone API key for vector storage
+  PINECONE_API_KEY: "your-pinecone-api-key",
+  PINECONE_ENVIRONMENT: "your-environment-region",
+  PINECONE_INDEX: "your-index-name",
+  
+  // Authentication - JWT secret (generate a secure random string)
+  JWT_SECRET: "replace-with-secure-random-string",
+  
+  // Database connection string (MongoDB)
+  MONGODB_URI: "mongodb://localhost:27017/racho_ai",
+  
+  // Optional integrations
+  GOOGLE_API_KEY: "your-google-api-key",
+  NOTION_API_KEY: "your-notion-api-key",
+  
+  // Server configuration
+  PORT: process.env.PORT || 3000,
+  NODE_ENV: process.env.NODE_ENV || 'development'
+};
