@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #5046E5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #3d34b3;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Server Connection Test</h1>
+    <p>This page will test if the server is running correctly and responding to API requests.</p>
+    
+    <button id="testApi">Test API Connection</button>
+    <button id="testAuth">Test Auth API</button>
+    <button id="testChat">Test Chat API</button>
+    <button id="testGithub">Test External API (GitHub)</button>
+    <button id="testOpenAI">Test OpenAI Direct</button>
+    
+    <div class="result" id="result">
+        <p>Click a button to test the connection...</p>
+    </div>
+    
+    <script>
+        document.getElementById('testApi').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing API connection...</p>';
+            
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">Connection successful!</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">Connection failed!</p>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        });
+        
+        document.getElementById('testAuth').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing Auth API...</p>';
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">Auth API responded:</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">Auth API request failed!</p>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        });
+        
+        document.getElementById('testChat').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing Chat API...</p>';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        initialMessage: 'Hello, this is a test message'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">Chat API responded:</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">Chat API request failed!</p>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        });
+        
+        document.getElementById('testGithub').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing external API connection (GitHub)...</p>';
+            
+            try {
+                const response = await fetch('https://api.github.com/users/github');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">External API connection successful!</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">External API connection failed!</p>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        });
+        
+        document.getElementById('testOpenAI').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing OpenAI API connection directly...</p>';
+            
+            try {
+                const response = await fetch('/api/test-openai-chat');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">OpenAI API connection successful!</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">OpenAI API connection failed!</p>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        });
+        
+        // Check server status on page load
+        (async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Checking server status automatically...</p>';
+            
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">Server is running!</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">Server check failed!</p>
+                    <pre>${error.message}</pre>
+                    <p>Please ensure the server is running on port 3000.</p>
+                `;
+            }
+        })();
+    </script>
+</body>
+</html>

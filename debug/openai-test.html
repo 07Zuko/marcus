@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI API Debugger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        h1 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .panel {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .response {
+            margin-top: 10px;
+            white-space: pre-wrap;
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #2196F3;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .server-status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+        .server-status.error {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        .server-status.warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+        }
+        .button-bar {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.secondary {
+            background-color: #2196F3;
+        }
+        button.secondary:hover {
+            background-color: #0b7dda;
+        }
+        .error {
+            color: #c62828;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ff8f00;
+            font-weight: bold;
+        }
+        .success {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .message-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .progress {
+            height: 4px;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #2196F3;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-bottom: -1px;
+        }
+        .tab.active {
+            border-color: #ddd;
+            border-bottom-color: #f9f9f9;
+            background-color: #f9f9f9;
+            border-radius: 4px 4px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="server-status" class="server-status">Checking server connection...</div>
+    
+    <h1>OpenAI API Debugger</h1>
+    <p>This utility tests the OpenAI API integration directly, bypassing the main application. It helps diagnose problems with the OpenAI connection.</p>
+    
+    <div class="button-bar">
+        <button id="test-connection" class="secondary">Check Server Connection</button>
+        <button id="test-openai-config">Test OpenAI Configuration</button>
+        <button id="test-direct-chat">Test Direct Chat API</button>
+    </div>
+    
+    <div class="panel">
+        <h2>Test OpenAI Direct Message</h2>
+        <p>Send a custom message to test the direct chat API:</p>
+        <input id="message-input" class="message-input" type="text" value="Hello, this is a test message." placeholder="Enter your test message...">
+        <button id="send-message">Send Test Message</button>
+        <div id="progress" class="progress">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+    </div>
+    
+    <div class="tabs">
+        <div class="tab active" data-tab="results">Test Results</div>
+        <div class="tab" data-tab="raw-response">Raw Response</div>
+        <div class="tab" data-tab="help">Troubleshooting</div>
+    </div>
+    
+    <div id="results-panel" class="panel">
+        <div id="results">
+            <h3>No Tests Run Yet</h3>
+            <p>Click one of the test buttons above to begin testing.</p>
+        </div>
+    </div>
+    
+    <div id="raw-response-panel" class="panel" style="display:none;">
+        <div id="response" class="response">No data yet.</div>
+    </div>
+    
+    <div id="help-panel" class="panel" style="display:none;">
+        <h3>Troubleshooting Guide</h3>
+        <p><strong>If the server isn't responding:</strong></p>
+        <ul>
+            <li>Make sure the server is running with <code>node server.js</code></li>
+            <li>Check that it's running on port 3000</li>
+            <li>Look for error messages in the server console</li>
+        </ul>
+        
+        <p><strong>If OpenAI integration is failing:</strong></p>
+        <ul>
+            <li>Verify your API key in <code>api/config.js</code> - it should start with "sk-"</li>
+            <li>Make sure it's a valid OpenAI API key, not a Claude or other service key</li>
+            <li>The app will work with fallback responses even without a valid key</li>
+        </ul>
+        
+        <p><strong>Other issues:</strong></p>
+        <ul>
+            <li>Try the simple chat tester at <a href="simple-chat.html">simple-chat.html</a></li>
+            <li>Check MongoDB connection if database errors occur</li>
+            <li>Restart the server if all else fails</li>
+        </ul>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const serverStatusDiv = document.getElementById('server-status');
+        const testConnectionBtn = document.getElementById('test-connection');
+        const testOpenAIConfigBtn = document.getElementById('test-openai-config');
+        const testDirectChatBtn = document.getElementById('test-direct-chat');
+        const messageInput = document.getElementById('message-input');
+        const sendMessageBtn = document.getElementById('send-message');
+        const resultsDiv = document.getElementById('results');
+        const responseDiv = document.getElementById('response');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Hide all panels
+                document.getElementById('results-panel').style.display = 'none';
+                document.getElementById('raw-response-panel').style.display = 'none';
+                document.getElementById('help-panel').style.display = 'none';
+                
+                // Show the selected panel
+                document.getElementById(tab.dataset.tab + '-panel').style.display = 'block';
+            });
+        });
+        
+        // Check server connection on load
+        checkServerConnection();
+        
+        // Check server connection
+        async function checkServerConnection() {
+            serverStatusDiv.textContent = 'Checking server connection...';
+            serverStatusDiv.className = 'server-status';
+            
+            try {
+                showProgress(30);
+                const response = await fetch('http://localhost:3000/api/test', { 
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                showProgress(100);
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    serverStatusDiv.textContent = '✅ Server is online and responding correctly.';
+                    serverStatusDiv.className = 'server-status';
+                    
+                    resultsDiv.innerHTML = `
+                        <h3 class="success">Server Connection Successful</h3>
+                        <p>The server is running and responds to API requests.</p>
+                        <p><strong>Server Time:</strong> ${data.time || 'Not provided'}</p>
+                    `;
+                    
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    serverStatusDiv.textContent = '⚠️ Server is online but returning errors.';
+                    serverStatusDiv.className = 'server-status warning';
+                    
+                    resultsDiv.innerHTML = `
+                        <h3 class="warning">Server Returning Errors</h3>
+                        <p>The server is running but the API test endpoint returned an error.</p>
+                        <p><strong>Status Code:</strong> ${response.status}</p>
+                        <p><strong>Error:</strong> ${data.error || 'Unknown error'}</p>
+                    `;
+                    
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                showProgress(100);
+                console.error('Server connection error:', error);
+                serverStatusDiv.textContent = '❌ Server is offline or not responding.';
+                serverStatusDiv.className = 'server-status error';
+                
+                resultsDiv.innerHTML = `
+                    <h3 class="error">Server Connection Failed</h3>
+                    <p>Could not connect to the server at http://localhost:3000</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Make sure the server is running with <code>node server.js</code></p>
+                `;
+                
+                responseDiv.textContent = `Connection Error: ${error.message}`;
+            }
+        }
+        
+        // Test OpenAI configuration
+        async function testOpenAIConfig() {
+            serverStatusDiv.textContent = 'Testing OpenAI configuration...';
+            serverStatusDiv.className = 'server-status';
+            
+            try {
+                showProgress(30);
+                const response = await fetch('http://localhost:3000/api/test-openai');
+                showProgress(100);
+                
+                const data = await response.json();
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    const apiKeyInfo = data.result.apiKey || 'Unknown';
+                    
+                    if (apiKeyInfo.includes('Present')) {
+                        serverStatusDiv.textContent = '✅ OpenAI API key is configured.';
+                        serverStatusDiv.className = 'server-status';
+                        
+                        resultsDiv.innerHTML = `
+                            <h3 class="success">OpenAI Configuration Valid</h3>
+                            <p>The OpenAI API key is present and properly configured.</p>
+                            <p><strong>API Key:</strong> ${apiKeyInfo}</p>
+                            <p><strong>Status:</strong> ${data.result.status || 'Unknown'}</p>
+                        `;
+                    } else {
+                        serverStatusDiv.textContent = '⚠️ OpenAI API key is missing or invalid.';
+                        serverStatusDiv.className = 'server-status warning';
+                        
+                        resultsDiv.innerHTML = `
+                            <h3 class="warning">OpenAI Configuration Issue</h3>
+                            <p>The OpenAI API key is missing or has an invalid format.</p>
+                            <p><strong>API Key:</strong> ${apiKeyInfo}</p>
+                            <p><strong>Status:</strong> ${data.result.status || 'Unknown'}</p>
+                            <p><em>The app will use fallback responses instead of actual OpenAI API calls.</em></p>
+                            <p>To fix this, update the OPENAI_API_KEY in api/config.js with a valid key that starts with "sk-".</p>
+                        `;
+                    }
+                } else {
+                    serverStatusDiv.textContent = '❌ Error testing OpenAI configuration.';
+                    serverStatusDiv.className = 'server-status error';
+                    
+                    resultsDiv.innerHTML = `
+                        <h3 class="error">OpenAI Configuration Test Failed</h3>
+                        <p>Could not test the OpenAI configuration.</p>
+                        <p><strong>Error:</strong> ${data.error || 'Unknown error'}</p>
+                    `;
+                }
+            } catch (error) {
+                showProgress(100);
+                console.error('OpenAI config test error:', error);
+                serverStatusDiv.textContent = '❌ Connection error testing OpenAI config.';
+                serverStatusDiv.className = 'server-status error';
+                
+                resultsDiv.innerHTML = `
+                    <h3 class="error">Connection Error</h3>
+                    <p>Could not connect to the OpenAI config test endpoint.</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+                
+                responseDiv.textContent = `Connection Error: ${error.message}`;
+            }
+        }
+        
+        // Test direct chat
+        async function testDirectChat() {
+            const message = "Hello, this is an automated test message sent at " + new Date().toISOString();
+            sendTestMessage(message);
+        }
+        
+        // Send a test message
+        async function sendTestMessage(message) {
+            message = message || messageInput.value.trim();
+            if (!message) {
+                alert("Please enter a message to test.");
+                return;
+            }
+            
+            serverStatusDiv.textContent = 'Testing direct chat API...';
+            serverStatusDiv.className = 'server-status';
+            resultsDiv.innerHTML = '<h3>Sending test message...</h3>';
+            
+            try {
+                const timestamp = new Date().toISOString();
+                showProgress(20);
+                
+                // Make API request to direct chat endpoint
+                const response = await fetch('http://localhost:3000/api/direct-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+                
+                showProgress(70);
+                
+                // Check if the response is OK
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                
+                // Check content type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Expected JSON response but got ${contentType}`);
+                }
+                
+                // Parse JSON response
+                const data = await response.json();
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                showProgress(100);
+                
+                if (data.success) {
+                    const modelInfo = data.result.model || 'Unknown';
+                    const isFallback = modelInfo === 'fallback' || modelInfo === 'error-fallback';
+                    
+                    if (isFallback) {
+                        serverStatusDiv.textContent = '⚠️ Using fallback responses (OpenAI API key not configured).';
+                        serverStatusDiv.className = 'server-status warning';
+                        
+                        resultsDiv.innerHTML = `
+                            <h3 class="warning">Direct Chat Test Successful (Fallback Mode)</h3>
+                            <p>The chat API responded successfully using fallback responses.</p>
+                            <p><strong>Message sent:</strong> "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"</p>
+                            <p><strong>Response:</strong> "${data.result.aiMessage.substring(0, 100)}${data.result.aiMessage.length > 100 ? '...' : ''}"</p>
+                            <p><strong>Model:</strong> ${modelInfo} <span class="warning">(Using fallback response system)</span></p>
+                            <p><em>To use real OpenAI responses, update the API key in api/config.js.</em></p>
+                        `;
+                    } else {
+                        serverStatusDiv.textContent = '✅ Direct chat API working correctly.';
+                        serverStatusDiv.className = 'server-status';
+                        
+                        resultsDiv.innerHTML = `
+                            <h3 class="success">Direct Chat Test Successful</h3>
+                            <p>The chat API responded successfully.</p>
+                            <p><strong>Message sent:</strong> "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"</p>
+                            <p><strong>Response:</strong> "${data.result.aiMessage.substring(0, 100)}${data.result.aiMessage.length > 100 ? '...' : ''}"</p>
+                            <p><strong>Model:</strong> ${modelInfo}</p>
+                        `;
+                    }
+                } else {
+                    serverStatusDiv.textContent = '❌ Error from direct chat API.';
+                    serverStatusDiv.className = 'server-status error';
+                    
+                    resultsDiv.innerHTML = `
+                        <h3 class="error">Direct Chat Test Failed</h3>
+                        <p>The API returned an error response.</p>
+                        <p><strong>Error:</strong> ${data.error || 'Unknown error'}</p>
+                    `;
+                }
+            } catch (error) {
+                showProgress(100);
+                console.error('Direct chat test error:', error);
+                serverStatusDiv.textContent = '❌ Connection error testing direct chat.';
+                serverStatusDiv.className = 'server-status error';
+                
+                resultsDiv.innerHTML = `
+                    <h3 class="error">Connection Error</h3>
+                    <p>Could not connect to the direct chat API endpoint.</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Make sure the server is running and check the server logs for details.</p>
+                `;
+                
+                responseDiv.textContent = `Connection Error: ${error.message}`;
+            }
+        }
+        
+        // Show progress in the progress bar
+        function showProgress(percent) {
+            progressBar.style.width = percent + '%';
+            if (percent >= 100) {
+                setTimeout(() => {
+                    progressBar.style.width = '0%';
+                }, 1000);
+            }
+        }
+        
+        // Event listeners
+        testConnectionBtn.addEventListener('click', checkServerConnection);
+        testOpenAIConfigBtn.addEventListener('click', testOpenAIConfig);
+        testDirectChatBtn.addEventListener('click', testDirectChat);
+        sendMessageBtn.addEventListener('click', () => sendTestMessage());
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendTestMessage();
+            }
+        });
+    </script>
+</body>
+</html>

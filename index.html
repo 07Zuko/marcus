@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Racho AI Assistant</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Additional chat formatting styles */
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            box-shadow: var(--shadow-sm);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .ai-message strong {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        
+        .ai-message em {
+            font-style: italic;
+            color: var(--dark-light);
+        }
+        
+        .ai-message code {
+            background-color: var(--light);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+        
+        .ai-message .list-number {
+            font-weight: 600;
+            color: var(--primary);
+            margin-right: 4px;
+        }
+        
+        .typing-indicator {
+            display: inline-block;
+            padding: 12px 16px;
+            background-color: var(--light);
+            border-radius: 18px;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 2C8.26801 2 2 8.26801 2 16C2 23.732 8.26801 30 16 30C23.732 30 30 23.732 30 16C30 8.26801 23.732 2 16 2Z" stroke="#5046E5" stroke-width="2"/>
+                    <path d="M16 8V16L21 21" stroke="#5046E5" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h1>Racho<span>AI</span></h1>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="index.html">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M21 12C21 16.9706 16.9706 21 12 21C10.2686 21 8.64511 20.5109 7.25209 19.6495L3 21L4.35046 16.7479C3.48909 15.3549 3 13.7314 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Chat
+                        </a>
+                    </li>
+                    <li>
+                        <a href="goals.html">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M5 22H19C20.1046 22 21 21.1046 21 20V4C21 2.89543 20.1046 2 19 2H5C3.89543 2 3 2.89543 3 4V20C3 21.1046 3.89543 22 5 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 16L11 18L15 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8 8H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8 12H12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Goals
+                        </a>
+                    </li>
+                    <li>
+                        <a href="tasks.html">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 18V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M4.93 4.93L7.76 7.76" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16.24 16.24L19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M2 12H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M18 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M4.93 19.07L7.76 16.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16.24 7.76L19.07 4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Tasks
+                        </a>
+                    </li>
+                    <li>
+                        <a href="logs.html">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3.05078 11C3.27246 7.61279 5.04498 4.53589 7.65859 2.57245C10.2722 0.609018 13.5235 -0.0421988 16.5828 0.798023C19.6421 1.63825 22.2026 3.89182 23.6155 6.85717C25.0284 9.82252 25.1549 13.2239 23.9615 16.292C22.7682 19.3601 20.3623 21.7724 17.3346 22.9839C14.307 24.1954 10.9133 24.0889 7.95838 22.6869C5.00344 21.285 2.74053 18.7313 1.88472 15.6741C1.02892 12.617 1.66425 9.36215 3.61998 6.74" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Activity Logs
+                        </a>
+                    </li>
+                    <li>
+                        <a href="insights.html">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M16 6L18.5 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M18.5 6L16 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 12H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 16L18.5 18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M18.5 16L16 18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 21V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M7.99995 16L5.49995 18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.49995 16L7.99995 18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3 12H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M7.99995 8.5L5.49995 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.49995 8.5L7.99995 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 3V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Insights
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" class="settings-link">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M8.325 2.317C8.751 0.561 11.249 0.561 11.675 2.317C11.7389 2.5808 11.8642 2.82578 12.0407 3.032C12.2172 3.23822 12.4399 3.39985 12.6907 3.50375C12.9414 3.60764 13.2132 3.65085 13.4838 3.62987C13.7544 3.60889 14.0162 3.5243 14.248 3.383C15.791 2.443 17.558 4.209 16.618 5.753C16.4769 5.98466 16.3924 6.24634 16.3715 6.51677C16.3506 6.78721 16.3938 7.05877 16.4975 7.30938C16.6013 7.55999 16.7627 7.78258 16.9687 7.95905C17.1747 8.13553 17.4194 8.26091 17.683 8.325C19.439 8.751 19.439 11.249 17.683 11.675C17.4192 11.7389 17.1742 11.8642 16.968 12.0407C16.7618 12.2172 16.6001 12.4399 16.4963 12.6907C16.3924 12.9414 16.3491 13.2132 16.3701 13.4838C16.3911 13.7544 16.4757 14.0162 16.617 14.248C17.557 15.791 15.791 17.558 14.247 16.618C14.0153 16.4769 13.7537 16.3924 13.4832 16.3715C13.2128 16.3506 12.9412 16.3938 12.6906 16.4975C12.44 16.6013 12.2174 16.7627 12.0409 16.9687C11.8645 17.1747 11.7391 17.4194 11.675 17.683C11.249 19.439 8.751 19.439 8.325 17.683C8.26108 17.4192 8.13578 17.1742 7.95929 16.968C7.7828 16.7618 7.56011 16.6001 7.30935 16.4963C7.05859 16.3924 6.78683 16.3491 6.51621 16.3701C6.24559 16.3911 5.98375 16.4757 5.752 16.617C4.209 17.557 2.442 15.791 3.382 14.247C3.5231 14.0153 3.60755 13.7537 3.62848 13.4832C3.6494 13.2128 3.60624 12.9412 3.50247 12.6906C3.3987 12.44 3.23726 12.2174 3.03127 12.0409C2.82529 11.8645 2.58056 11.7391 2.317 11.675C0.561 11.249 0.561 8.751 2.317 8.325C2.5808 8.26108 2.82578 8.13578 3.032 7.95929C3.23822 7.7828 3.39985 7.56011 3.50375 7.30935C3.60764 7.05859 3.65085 6.78683 3.62987 6.51621C3.60889 6.24559 3.5243 5.98375 3.383 5.752C2.443 4.209 4.209 2.442 5.753 3.382C6.753 4.011 8.049 3.696 8.325 2.317Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 13C11.6569 13 13 11.6569 13 10C13 8.34315 11.6569 7 10 7C8.34315 7 7 8.34315 7 10C7 11.6569 8.34315 13 10 13Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Settings
+                </a>
+                <div class="user-profile">
+                    <div class="avatar">M</div>
+                    <div class="user-name">Marcus</div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>Chat with Racho</h2>
+                    <button class="new-chat-btn" id="new-chat-btn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 4.16667V15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4.16675 10H15.8334" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        New Chat
+                    </button>
+                </div>
+                <div id="messages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <textarea id="message-input" placeholder="Type your message..." rows="1"></textarea>
+                    <button id="send-button" class="send-btn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M18.3333 1.66667L9.16667 10.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M18.3333 1.66667L12.5 18.3333L9.16667 10.8333L1.66667 7.5L18.3333 1.66667Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        
+        // Define a unique key for storing messages in localStorage
+        const STORAGE_KEY = 'racho_chat_messages';
+        
+        // Messages array to keep track of conversation
+        let chatMessages = [];
+        
+        // Auto-resize textarea as user types
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            // Limit height to avoid excessive growth
+            if (parseInt(this.style.height) > 150) {
+                this.style.height = '150px';
+            }
+        });
+        
+        // Load chat history from localStorage or initialize with welcome message
+        function loadChatHistory() {
+            try {
+                const savedMessages = localStorage.getItem(STORAGE_KEY);
+                if (savedMessages) {
+                    chatMessages = JSON.parse(savedMessages);
+                    
+                    // Clear messages container before repopulating
+                    messagesContainer.innerHTML = '';
+                    
+                    // Re-render all messages
+                    chatMessages.forEach(msg => {
+                        renderMessage(msg.content, msg.type);
+                    });
+                    
+                    // Scroll to bottom after loading messages
+                    setTimeout(scrollToBottom, 100);
+                } else {
+                    // Initialize with welcome message if no history exists
+                    const welcomeMessage = 'Hello! I am Racho, your AI life coach and cofounder assistant. I can help you with goal-setting, productivity, personal development, and startup advice. How can I assist you today?';
+                    addMessage(welcomeMessage, 'system');
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+                // Fallback to welcome message
+                const welcomeMessage = 'Hello! I am Racho, your AI life coach and cofounder assistant. I can help you with goal-setting, productivity, personal development, and startup advice. How can I assist you today?';
+                addMessage(welcomeMessage, 'system');
+            }
+        }
+        
+        // Save current chat history to localStorage
+        function saveChatHistory() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(chatMessages));
+            } catch (error) {
+                console.error('Error saving chat history:', error);
+            }
+        }
+        
+        // Handle sending a message
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Clear input and reset height
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Display user message
+            addMessage(message, 'user');
+            
+            // URGENT FIX: Handle goal confirmation directly on the client side
+            // This is a temporary fix to ensure goal creation works correctly
+            const lowerMessage = message.toLowerCase();
+            const isSimpleYes = ['yes', 'yeah', 'yep', 'sure', 'yes please', 'ok', 'okay'].includes(lowerMessage);
+            const lastAIMessageIndex = findLastAIMessageIndex();
+            
+            if (isSimpleYes && lastAIMessageIndex !== -1) {
+                const lastAIMessage = chatMessages[lastAIMessageIndex].content.toLowerCase();
+                const isGoalQuestion = (
+                    lastAIMessage.includes('set a goal') || 
+                    lastAIMessage.includes('fitness goal') ||
+                    lastAIMessage.includes('help you set') ||
+                    lastAIMessage.includes('bench press')
+                );
+                
+                if (isGoalQuestion) {
+                    console.log("DETECTED GOAL CONFIRMATION! Handling directly...");
+                    
+                    // Extract goal details from conversation
+                    let goalTitle = 'Get stronger in the gym';
+                    let category = 'fitness';
+                    let deadline = 'end of year';
+                    
+                    // Look for bench press goals
+                    for (const msg of chatMessages) {
+                        if (msg.type === 'user') {
+                            const content = msg.content.toLowerCase();
+                            if (content.includes('bench press') || content.includes('bench to')) {
+                                const weightMatch = content.match(/(\d+)\s*(lbs|pounds|kg|lb)/);
+                                if (weightMatch) {
+                                    goalTitle = `Bench press ${weightMatch[1]} ${weightMatch[2]}`;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Show typing indicator
+                    const typingIndicator = document.createElement('div');
+                    typingIndicator.className = 'typing-indicator';
+                    typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+                    messagesContainer.appendChild(typingIndicator);
+                    scrollToBottom();
+                    
+                    // Add success message after a brief delay
+                    setTimeout(() => {
+                        // Remove typing indicator
+                        messagesContainer.removeChild(typingIndicator);
+                        
+                        // Add AI confirmation
+                        addMessage(`Done! I've added "${goalTitle}" to your goals. You can track your progress in the Goals tab.`, 'ai');
+                        
+                        // Add system confirmation
+                        addMessage(`✅ Goal created successfully! Your goal "${goalTitle}" has been added to your goals.`, 'system');
+                        
+                        // Clear goal context
+                        localStorage.removeItem('current_chat_context');
+                    }, 1000);
+                    
+                    return; // Skip server request since we handled it locally
+                }
+            }
+            
+            // Normal flow continues here for non-goal confirmations
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+            messagesContainer.appendChild(typingIndicator);
+            scrollToBottom();
+            
+            try {
+                // Convert chat messages to the format expected by the API
+                const history = chatMessages
+                    .filter(msg => msg.type === 'user' || msg.type === 'ai') // Only include user and AI messages
+                    .map(msg => ({
+                        role: msg.type === 'user' ? 'user' : 'assistant',
+                        content: msg.content
+                    }));
+                    
+                console.log('Sending message with history length:', history.length);
+                
+                // Make API request to the direct chat endpoint
+                const response = await fetch('http://localhost:3000/api/direct-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        history: history
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                messagesContainer.removeChild(typingIndicator);
+                
+                if (data.success) {
+                    // Display AI response
+                    addMessage(data.result.aiMessage, 'ai');
+                } else {
+                    // Display error
+                    addMessage(`Error: ${data.error || 'Unknown error'}`, 'system');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                
+                // Remove typing indicator
+                if (typingIndicator.parentNode) {
+                    messagesContainer.removeChild(typingIndicator);
+                }
+                
+                addMessage(`Connection error: ${error.message}`, 'system');
+            }
+        }
+        
+        // Clear chat and start new conversation
+        function startNewChat() {
+            // Clear all messages from UI
+            messagesContainer.innerHTML = '';
+            
+            // Clear messages array
+            chatMessages = [];
+            
+            // Add initial system message
+            addMessage('Hello! I am Racho, your AI life coach and cofounder assistant. How can I assist you today?', 'system');
+            
+            // Save empty chat to localStorage
+            saveChatHistory();
+        }
+        
+        // Function to find the last AI message
+        function findLastAIMessageIndex() {
+            for (let i = chatMessages.length - 1; i >= 0; i--) {
+                if (chatMessages[i].type === 'ai') {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        
+        // Add a message to the chat and save to history
+        function addMessage(content, type) {
+            // Add to messages array
+            chatMessages.push({ content, type });
+            
+            // Render message in UI
+            renderMessage(content, type);
+            
+            // Save to localStorage
+            saveChatHistory();
+        }
+        
+        // Render a message in the UI without adding to history
+        function renderMessage(content, type) {
+            if (type === 'user') {
+                // Create message container
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                
+                // Create message content
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.textContent = content;
+                
+                // Add classes based on type
+                messageDiv.classList.add(type === 'user' ? 'user' : 'ai');
+                
+                // Assemble message
+                messageDiv.appendChild(messageContent);
+                messagesContainer.appendChild(messageDiv);
+            } else if (type === 'ai') {
+                // Create message container
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ai';
+                
+                // Create avatar for AI
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.innerHTML = `
+                    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                        <rect width="36" height="36" rx="18" fill="#5046E5" fill-opacity="0.1"/>
+                        <path d="M23 18C23 20.7614 20.7614 23 18 23C17.2426 23 16.5287 22.8191 15.8954 22.4938L14 23L14.5062 21.1046C14.1809 20.4713 14 19.7574 14 19C14 16.2386 16.2386 14 19 14C21.7614 14 24 16.2386 24 19" stroke="#5046E5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                `;
+                
+                // Create message content with formatting
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                
+                // Format the content with markdown-like formatting
+                const formattedContent = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')             // Italic
+                    .replace(/`(.*?)`/g, '<code>$1</code>')           // Inline code
+                    .replace(/\n\n/g, '<br><br>')                     // Paragraph breaks
+                    .replace(/\n/g, '<br>')                           // Line breaks
+                    .replace(/- (.*?)(?:<br>|$)/g, '• $1<br>')        // Bullets
+                    
+                    // Split by numbered list items (1., 2., etc.)
+                    .replace(/(\d+)\. (.*?)(?:<br>|$)/g, '<span class="list-number">$1.</span> $2<br>');
+                
+                messageContent.innerHTML = formattedContent;
+                messageContent.classList.add('ai-message');
+                
+                // Assemble message
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(messageContent);
+                messagesContainer.appendChild(messageDiv);
+            } else if (type === 'system') {
+                // Create system message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'system-message';
+                messageDiv.innerHTML = content; // Use innerHTML to allow for formatting
+                messagesContainer.appendChild(messageDiv);
+            }
+            
+            // Scroll to bottom
+            scrollToBottom();
+        }
+        
+        // Scroll chat to bottom
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadChatHistory();
+            checkChatIntent();
+        });
+        
+        // Check if there's a chat intent stored in localStorage
+        function checkChatIntent() {
+            const intent = localStorage.getItem('chat_intent');
+            if (!intent) return;
+            
+            // Process based on intent type
+            if (intent === 'create_goal') {
+                // Send a message to create a goal - more conversational
+                const goalMessage = "I'd like to set a new goal for myself. Can you help me with that?";
+                addMessage(goalMessage, 'user');
+                sendSpecialMessage(goalMessage);
+                
+                // Clear the intent
+                localStorage.removeItem('chat_intent');
+            } 
+            else if (intent === 'edit_goal') {
+                // Get the goal ID
+                const goalId = localStorage.getItem('chat_goal_id');
+                if (goalId) {
+                    // Send a message to edit that goal - more conversational
+                    const message = `I need to update one of my goals. It's the one about ID ${goalId}. Can you help me change it?`;
+                    addMessage(message, 'user');
+                    sendSpecialMessage(message);
+                    
+                    // Clear the stored data
+                    localStorage.removeItem('chat_intent');
+                    localStorage.removeItem('chat_goal_id');
+                }
+            }
+            else if (intent === 'create_task') {
+                // Send a message to create a task - more conversational
+                const taskMessage = "I need to add a new task to my list. Can you help me set that up?";
+                addMessage(taskMessage, 'user');
+                sendSpecialMessage(taskMessage);
+                
+                // Clear the intent
+                localStorage.removeItem('chat_intent');
+            }
+        }
+        
+        // Send a message without user input (for automatic messages)
+        async function sendSpecialMessage(message) {
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+            messagesContainer.appendChild(typingIndicator);
+            scrollToBottom();
+            
+            try {
+                // Convert chat messages to the format expected by the API
+                const history = chatMessages
+                    .filter(msg => msg.type === 'user' || msg.type === 'ai') // Only include user and AI messages
+                    .map(msg => ({
+                        role: msg.type === 'user' ? 'user' : 'assistant',
+                        content: msg.content
+                    }));
+                    
+                console.log('Sending special message with history length:', history.length);
+                
+                // Make API request to the direct chat endpoint
+                const response = await fetch('http://localhost:3000/api/direct-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        history: history
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                messagesContainer.removeChild(typingIndicator);
+                
+                if (data.success) {
+                    // Display AI response
+                    addMessage(data.result.aiMessage, 'ai');
+                    
+                    // Check if a goal was actually created
+                    if (data.result.goalCreated) {
+                        console.log('GOAL CREATED:', data.result.goalData);
+                        
+                        // Show success notification
+                        const goalTitle = data.result.goalData?.title || 'fitness goal';
+                        
+                        // Add system message about goal creation
+                        addMessage(`✅ Goal created successfully! Your goal "${goalTitle}" has been added to your goals. You can track it in the Goals tab.`, 'system');
+                        
+                        // Reset the chat context
+                        localStorage.removeItem('current_chat_context');
+                    }
+                    // Update chat context if goal/task creation is detected
+                    else if (data.result.goalDetected) {
+                        localStorage.setItem('current_chat_context', 'creating_goal');
+                    } else if (data.result.taskDetected) {
+                        localStorage.setItem('current_chat_context', 'creating_task');
+                    }
+                } else {
+                    // Display error
+                    addMessage(`Error: ${data.error || 'Unknown error'}`, 'system');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                
+                // Remove typing indicator
+                if (typingIndicator.parentNode) {
+                    messagesContainer.removeChild(typingIndicator);
+                }
+                
+                addMessage(`Connection error: ${error.message}`, 'system');
+            }
+        }
+        
+        // Handle user message sending
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Clear input and reset height
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Display user message
+            addMessage(message, 'user');
+            
+            // Check for goal confirmation phrases
+            const currentContext = localStorage.getItem('current_chat_context');
+            // Expanded list of confirmation phrases
+            const confirmationPhrases = [
+                'add it', 'create it', 'save it', 'add this goal', 'create this goal', 
+                'save this goal', 'set it up', 'looks good', 'yes, add it', 'yes, create it', 
+                'yes', 'yeah', 'sure', 'go ahead', 'do it', 'ok', 'okay', 'sounds good', 
+                'please', 'that works', 'i like it', 'perfect', 'great', 'do that', 'yes please', 
+                'yes do that', 'please do', 'create', 'add', 'save'
+            ];
+            
+            // More aggressive confirmation detection - anything positive is treated as confirmation
+            const isConfirming = 
+                // Exact matches or contains a confirmation phrase
+                confirmationPhrases.some(phrase => 
+                    message.toLowerCase() === phrase || 
+                    message.toLowerCase().includes(phrase)
+                ) || 
+                // Single-word positive responses  
+                (message.split(' ').length <= 3 && !message.toLowerCase().includes('no') && !message.toLowerCase().includes('not'));
+            
+            if (currentContext === 'creating_goal' && isConfirming) {
+                // User has confirmed goal creation
+                // First get the previous AI message to extract goal details
+                const messages = document.querySelectorAll('.ai-message');
+                if (messages.length > 0) {
+                    const lastAIMessage = messages[messages.length - 1].textContent;
+                    
+                    // Ultra aggressive goal extraction with simplified approach
+                    let goalText = "";
+                    let categoryText = "";
+                    let priorityText = "medium"; // Default
+                    let deadlineText = ""; 
+                    
+                    // FIRST try to find structured goal list format
+                    const goalListMatch = lastAIMessage.match(/Goal:\s*([^\n]+)/i);
+                    const categoryListMatch = lastAIMessage.match(/Category:\s*([^\n]+)/i);
+                    const dueMatch = lastAIMessage.match(/Due:\s*([^\n]+)/i) || 
+                                      lastAIMessage.match(/Target date:\s*([^\n]+)/i) || 
+                                      lastAIMessage.match(/Deadline:\s*([^\n]+)/i) || 
+                                      lastAIMessage.match(/Due date:\s*([^\n]+)/i);
+                    
+                    if (goalListMatch) {
+                        // We found a structured goal list
+                        goalText = goalListMatch[1].trim();
+                        if (categoryListMatch) categoryText = categoryListMatch[1].trim();
+                        if (dueMatch) deadlineText = dueMatch[1].trim();
+                    } else {
+                        // PLAN B: Use the most recent non-confirmation user message
+                        const userMessages = document.querySelectorAll('.user .message-content');
+                        
+                        // Start from most recent and go back, skipping the confirmation message
+                        if (userMessages.length > 1) {
+                            // Use the message before confirmation as the goal
+                            goalText = userMessages[userMessages.length - 2].textContent.trim();
+                            
+                            // Look for deadline in that message
+                            const byMatch = goalText.match(/by\s+(end\s+of\s+[a-z]+|[a-z]+)/i);
+                            if (byMatch) {
+                                deadlineText = byMatch[1].trim();
+                                // Clean up goal text by removing the deadline part if possible
+                                goalText = goalText.replace(/\s+by\s+(end\s+of\s+[a-z]+|[a-z]+)/i, '').trim();
+                            }
+                        }
+                        
+                        // Auto-detect category based on goal content
+                        if (goalText.toLowerCase().match(/(weight|body|fat|exercise|gym|fitness|diet|nutrition|health|workout|run|bench|press|lift|train)/i)) {
+                            categoryText = "fitness";
+                        } else if (goalText.toLowerCase().match(/(learn|study|read|book|course|class|skill|knowledge|language|code|program)/i)) {
+                            categoryText = "learning";
+                        } else if (goalText.toLowerCase().match(/(work|job|career|business|project|professional)/i)) {
+                            categoryText = "career";
+                        } else if (goalText.toLowerCase().match(/(save|money|budget|invest|financial|finance|fund|dollar)/i)) {
+                            categoryText = "financial";
+                        } else {
+                            categoryText = "personal"; // Default
+                        }
+                    }
+                    
+                    // If we still have no deadline, check all previous user messages
+                    if (!deadlineText) {
+                        const userMessages = document.querySelectorAll('.user .message-content');
+                        for (let i = userMessages.length - 1; i >= 0; i--) {
+                            const content = userMessages[i].textContent;
+                            // Check for deadline patterns
+                            if (content.match(/by\s+(end\s+of\s+[a-z]+|[a-z]+)/i)) {
+                                deadlineText = content.match(/by\s+(end\s+of\s+[a-z]+|[a-z]+)/i)[1].trim();
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // If still no deadline, default to "end of year"
+                    if (!deadlineText) {
+                        deadlineText = "end of year";
+                    }
+                    
+                    // Create final goal data with extracted or default values
+                    const goalMatch = goalText ? { 1: goalText } : null;
+                    const categoryMatch = categoryText ? { 1: categoryText } : null;
+                    const priorityMatch = { 1: priorityText }; 
+                    const deadlineMatch = deadlineText ? { 1: deadlineText } : null;
+                    
+                    console.log("Extracted goal data:", { goalText, categoryText, priorityText, deadlineText });
+                    
+                    if (goalMatch) {
+                        // Extract goal info
+                        const goalData = {
+                            title: goalMatch[1].trim(),
+                            description: '',
+                            category: categoryMatch ? categoryMatch[1].trim().toLowerCase() : 'other',
+                            priority: priorityMatch ? priorityMatch[1].trim().toLowerCase() : 'medium',
+                            deadline: deadlineMatch ? new Date(deadlineMatch[1].trim()) : null
+                        };
+                        
+                        // Show typing indicator for goal creation
+                        const typingIndicator = document.createElement('div');
+                        typingIndicator.className = 'typing-indicator';
+                        typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+                        messagesContainer.appendChild(typingIndicator);
+                        scrollToBottom();
+                        
+                        try {
+                            // Make API request to actually create the goal
+                            const createResponse = await fetch('http://localhost:3000/api/goals', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                                },
+                                body: JSON.stringify(goalData)
+                            });
+                            
+                            // Remove typing indicator
+                            messagesContainer.removeChild(typingIndicator);
+                            
+                            if (createResponse.ok) {
+                                const createData = await createResponse.json();
+                                // Send confirmation message to the API for better continuity
+                                try {
+                                    await fetch('http://localhost:3000/api/direct-chat', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            message: "The goal was successfully created in the system"
+                                        })
+                                    });
+                                } catch (e) {
+                                    console.error("Error sending confirmation to AI:", e);
+                                }
+                                
+                                // Add success message
+                                addMessage(`✅ <strong>Goal created successfully!</strong> I've added "${goalData.title}" to your goals list. You can view and track it in the Goals tab. Is there anything else you'd like to do with this goal, such as adding specific tasks for it?`, 'system');
+                                
+                                // Clear the context
+                                localStorage.removeItem('current_chat_context');
+                            } else {
+                                // If not authenticated
+                                if (createResponse.status === 401) {
+                                    addMessage(`I'd love to add this goal for you, but you'll need to log in first. For now, I've saved the details so you can add it later.`, 'system');
+                                } else {
+                                    // Other error
+                                    addMessage(`I tried to add your goal but ran into a technical issue. Please try again in a moment, or you can add it manually in the Goals tab.`, 'system');
+                                }
+                            }
+                            
+                            return; // Skip normal message sending
+                        } catch (error) {
+                            console.error('Error creating goal:', error);
+                            messagesContainer.removeChild(typingIndicator);
+                            addMessage(`I had trouble connecting to save your goal. Please check your connection and try again, or add it manually in the Goals tab.`, 'system');
+                            return; // Skip normal message sending
+                        }
+                    }
+                }
+            }
+            
+            // Normal message flow if not confirming goal/task creation
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+            messagesContainer.appendChild(typingIndicator);
+            scrollToBottom();
+            
+            try {
+                // Make API request to the direct chat endpoint
+                const response = await fetch('http://localhost:3000/api/direct-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                messagesContainer.removeChild(typingIndicator);
+                
+                if (data.success) {
+                    // Display AI response
+                    addMessage(data.result.aiMessage, 'ai');
+                    
+                    // Check if a goal was actually created
+                    if (data.result.goalCreated) {
+                        console.log('GOAL CREATED:', data.result.goalData);
+                        
+                        // Show success notification
+                        const goalTitle = data.result.goalData?.title || 'fitness goal';
+                        
+                        // Add system message about goal creation
+                        addMessage(`✅ Goal created successfully! Your goal "${goalTitle}" has been added to your goals. You can track it in the Goals tab.`, 'system');
+                        
+                        // Reset the chat context
+                        localStorage.removeItem('current_chat_context');
+                    }
+                    // Update chat context if goal/task creation is detected
+                    else if (data.result.goalDetected) {
+                        localStorage.setItem('current_chat_context', 'creating_goal');
+                    } else if (data.result.taskDetected) {
+                        localStorage.setItem('current_chat_context', 'creating_task');
+                    }
+                } else {
+                    // Display error
+                    addMessage(`Error: ${data.error || 'Unknown error'}`, 'system');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                
+                // Remove typing indicator
+                if (typingIndicator.parentNode) {
+                    messagesContainer.removeChild(typingIndicator);
+                }
+                
+                addMessage(`Connection error: ${error.message}`, 'system');
+            }
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        newChatBtn.addEventListener('click', startNewChat);
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

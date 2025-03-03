@@ -1,0 +1,199 @@
+/* Logs Page Styles */
+
+.logs-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.logs-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0;
+}
+
+.period-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius);
+    background-color: var(--white);
+    color: var(--dark);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239B9BAD' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+}
+
+.period-select:hover, .period-select:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+/* Logs Timeline */
+.logs-timeline {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.day-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.day-header {
+    margin-bottom: 0.5rem;
+}
+
+.day-header h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+/* Log Items */
+.log-item {
+    display: flex;
+    background-color: var(--white);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid var(--light-gray);
+    margin-bottom: 0.75rem;
+}
+
+.log-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.log-time {
+    min-width: 70px;
+    color: var(--gray);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding-top: 0.25rem;
+}
+
+.log-content {
+    flex: 1;
+    display: flex;
+}
+
+.log-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.log-icon.chat {
+    background-color: rgba(80, 70, 229, 0.1);
+}
+
+.log-icon.task {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.log-icon.insight {
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+.log-icon.goal {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.log-details {
+    flex: 1;
+}
+
+.log-details h4 {
+    margin: 0 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.log-details p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--gray);
+    line-height: 1.4;
+}
+
+/* Load More Button */
+.load-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.load-more-btn {
+    padding: 0.625rem 1.25rem;
+    background-color: var(--white);
+    border: 1px solid var(--light-gray);
+    color: var(--dark);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.load-more-btn:hover {
+    background-color: var(--light);
+    border-color: var(--primary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .logs-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .log-time {
+        min-width: 60px;
+        font-size: 0.7rem;
+    }
+    
+    .log-details h4 {
+        font-size: 0.875rem;
+    }
+    
+    .log-details p {
+        font-size: 0.8125rem;
+    }
+}

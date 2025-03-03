@@ -1,0 +1,245 @@
+/* Goals Page Specific Styles */
+.goals-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.goals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.goals-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.add-goal-btn {
+    display: flex;
+    align-items: center;
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.add-goal-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.add-goal-btn svg {
+    margin-right: 0.5rem;
+}
+
+.goals-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    color: var(--gray);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tab-btn:hover {
+    color: var(--dark);
+    background-color: var(--light-gray);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    background-color: rgba(80, 70, 229, 0.1);
+}
+
+.goals-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.goal-item {
+    display: flex;
+    align-items: center;
+    background-color: var(--white);
+    border-radius: var(--border-radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid var(--light-gray);
+}
+
+.goal-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.goal-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.goal-status.not-started {
+    background-color: var(--gray);
+}
+
+.goal-status.in-progress {
+    background-color: var(--info);
+}
+
+.goal-status.completed {
+    background-color: var(--success);
+}
+
+.goal-info {
+    flex: 1;
+}
+
+.goal-info h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.goal-details {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.goal-category {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+}
+
+.goal-category.business {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--info);
+}
+
+.goal-category.wellness {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.goal-category.learning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.goal-category.fitness {
+    background-color: rgba(244, 63, 94, 0.1);
+    color: #F43F5E; /* Pink */
+}
+
+.goal-deadline {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.goal-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background-color: var(--info);
+    border-radius: var(--border-radius-sm);
+    transition: width 0.5s ease;
+}
+
+.progress.completed {
+    background-color: var(--success);
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.goal-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.action-btn:hover {
+    background-color: var(--light-gray);
+    color: var(--dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .goal-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .goal-status {
+        margin-bottom: 0.5rem;
+    }
+    
+    .goal-actions {
+        margin-left: 0;
+        margin-top: 1rem;
+        align-self: flex-end;
+    }
+    
+    .goals-tabs {
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+}
